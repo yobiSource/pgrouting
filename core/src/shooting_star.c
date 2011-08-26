@@ -35,7 +35,7 @@
 
 //-------------------------------------------------------------------------
 
-Datum shortest_path_shooting_star(PG_FUNCTION_ARGS);
+Datum PGR_ShootingStar(PG_FUNCTION_ARGS);
 
 #undef DEBUG
 //#define DEBUG 1
@@ -444,9 +444,9 @@ static int compute_shortest_path_shooting_star(char* sql, int source_edge_id,
 }
 
 
-PG_FUNCTION_INFO_V1(shortest_path_shooting_star);
+PG_FUNCTION_INFO_V1(PGR_ShootingStar);
 Datum
-shortest_path_shooting_star(PG_FUNCTION_ARGS)
+PGR_ShootingStar(PG_FUNCTION_ARGS)
 {
   FuncCallContext     *funcctx;
   int                  call_cntr;

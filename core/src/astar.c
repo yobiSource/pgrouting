@@ -66,7 +66,7 @@ long profipts1, profipts2, profopts;
 
 //-------------------------------------------------------------------------
 
-Datum shortest_path_astar(PG_FUNCTION_ARGS);
+Datum PGR_AStar(PG_FUNCTION_ARGS);
 
 #undef DEBUG
 //#define DEBUG 1
@@ -451,9 +451,9 @@ static int compute_shortest_path_astar(char* sql, int source_vertex_id,
 }
 
 
-PG_FUNCTION_INFO_V1(shortest_path_astar);
+PG_FUNCTION_INFO_V1(PGR_AStar);
 Datum
-shortest_path_astar(PG_FUNCTION_ARGS)
+PGR_AStar(PG_FUNCTION_ARGS)
 {
   FuncCallContext     *funcctx;
   int                  call_cntr;

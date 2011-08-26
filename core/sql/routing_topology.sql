@@ -8,7 +8,7 @@
 -- Last changes: 16.04.2008
 -- Author: Christian Gonzalez
 -----------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION point_to_id(p geometry, tolerance double precision)
+CREATE OR REPLACE FUNCTION PGR_create_point_id(p geometry, tolerance double precision)
 RETURNS BIGINT 
 AS 
 $$ 
@@ -53,7 +53,7 @@ END; $$ LANGUAGE 'plpgsql' VOLATILE STRICT;
 -- Author: Christian Gonzalez
 -----------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION assign_vertex_id(geom_table varchar, tolerance double precision, geo_cname varchar, gid_cname varchar)
+CREATE OR REPLACE FUNCTION PGR_create_vertex_id(geom_table varchar, tolerance double precision, geo_cname varchar, gid_cname varchar)
 RETURNS VARCHAR AS
 $$
 DECLARE
@@ -82,13 +82,13 @@ BEGIN
     CREATE INDEX vertices_tmp_idx ON vertices_tmp USING GIST (the_geom);
 			
     FOR _r IN EXECUTE 'SELECT ' || quote_ident(gid_cname) || ' AS id,'
-	    || ' StartPoint('|| quote_ident(geo_cname) ||') AS source,'
-            || ' EndPoint('|| quote_ident(geo_cname) ||') as target'
+	    || ' ST_StartPoint('|| quote_ident(geo_cname) ||') AS source,'
+            || ' ST_EndPoint('|| quote_ident(geo_cname) ||') as target'
 	    || ' FROM ' || quote_ident(geom_table) 
     LOOP
         
-        source_id := point_to_id(setsrid(_r.source, srid), tolerance);
-	target_id := point_to_id(setsrid(_r.target, srid), tolerance);
+    source_id := PGR_create_point_id(ST_setSRID(_r.source, srid), tolerance);
+	target_id := PGR_create_point_id(ST_setSRID(_r.target, srid), tolerance);
 								
 	EXECUTE 'update ' || quote_ident(geom_table) || 
 		' SET source = ' || source_id || 

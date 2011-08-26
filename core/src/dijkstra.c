@@ -28,7 +28,7 @@
 
 #include "dijkstra.h"
 
-Datum shortest_path(PG_FUNCTION_ARGS);
+Datum PGR_Dijkstra(PG_FUNCTION_ARGS);
 
 #undef DEBUG
 //#define DEBUG 1
@@ -351,9 +351,9 @@ static int compute_shortest_path(char* sql, int start_vertex,
 }
 
 
-PG_FUNCTION_INFO_V1(shortest_path);
+PG_FUNCTION_INFO_V1(PGR_Dijkstra);
 Datum
-shortest_path(PG_FUNCTION_ARGS)
+PGR_Dijkstra(PG_FUNCTION_ARGS)
 {
   FuncCallContext     *funcctx;
   int                  call_cntr;
