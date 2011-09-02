@@ -26,13 +26,3 @@ CREATE OR REPLACE FUNCTION driving_distance(sql text, source_id integer,
         RETURNS SETOF path_result
         AS '$libdir/librouting_dd'
         LANGUAGE 'C' IMMUTABLE STRICT;
-                        
------------------------------------------------------------------------
--- Core function for alpha shape computation.
--- The sql should return vertex ids and x,y values. Return ordered
--- vertex ids. 
------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION alphashape(sql text)
-        RETURNS SETOF vertex_result
-        AS '$libdir/librouting_dd'
-        LANGUAGE 'C' IMMUTABLE STRICT;

@@ -53,7 +53,7 @@ END; $$ LANGUAGE 'plpgsql' VOLATILE STRICT;
 -- Author: Christian Gonzalez
 -----------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION PGR_create_vertex_id(geom_table varchar, tolerance double precision, geo_cname varchar, gid_cname varchar)
+CREATE OR REPLACE FUNCTION PGR_create_topology(geom_table varchar, tolerance double precision, geo_cname varchar, gid_cname varchar)
 RETURNS VARCHAR AS
 $$
 DECLARE
