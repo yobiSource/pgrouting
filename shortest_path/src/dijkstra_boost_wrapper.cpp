@@ -25,164 +25,140 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 
-#include "dijkstra.h"
+#include <algorithm> //copy
+#include <vector>
+
+#include "dijkstra.h" //path_type_t
 
 using namespace std;
 using namespace boost;
 
-/*
-//	FIXME: use this to avoid heap allocation ?
 
-void* operator new(size_t size)
+struct Edge
 {
-return palloc(size);
-}
-
-void operator delete(void *p)
-{
-    pfree(p);
-}
-
-*/
-
-// Maximal number of nodes in the path (to avoid infinite loops)
-#define MAX_NODES 100000000
+  int id;
+  float8 cost;
+};
 
 struct Vertex
 {
-    int id;
-    float8 cost;
+  int id;
+  int edge_id;
 };
 
 
-int 
-boost_dijkstra(edge_t *edges, unsigned int count, int start_vertex, int end_vertex,
-	       bool directed, bool has_reverse_cost,
-	       path_element_t **path, int *path_count, char **err_msg)
+template <class G>
+static void
+graph_add_edge(G &graph, int id, int source, int target, float8 cost)
 {
+  typedef typename graph_traits<G>::edge_descriptor E;
+  E e;
+  bool inserted;
 
-    // FIXME: use a template for the directedS parameters
-    typedef adjacency_list < listS, vecS, directedS, no_property, Vertex> graph_t;
+  if (cost < 0) // edges are not inserted in the graph if cost is negative
+    return;
 
-    typedef graph_traits < graph_t >::vertex_descriptor vertex_descriptor;
-    typedef graph_traits < graph_t >::edge_descriptor edge_descriptor;
-    typedef std::pair<int, int> Edge;
+  tie(e, inserted) = add_edge(source, target, graph);
 
-    // FIXME: compute this value
-    const unsigned int num_nodes = ((directed && has_reverse_cost ? 2 : 1) * count) + 100;
+  graph[e].cost = cost;
+  graph[e].id = id;
+}
 
-    graph_t graph(num_nodes);
+template <class G>
+static int
+get_edge_id(G &graph, int source, int target)
+{
+  typedef typename graph_traits<G>::edge_descriptor E;
+  E e;
+  bool found;
 
-    property_map<graph_t, edge_weight_t>::type weightmap = get(edge_weight, graph);
+  tie(e, found) = boost::edge(source, target, graph);
 
-    for (std::size_t j = 0; j < count; ++j)
+  return found ? graph[e].id : -1;
+}
+
+template <class G>
+static float8
+get_edge_cost(G &graph, int source, int target)
+{
+  typedef typename graph_traits<G>::edge_descriptor E;
+  E e;
+  bool found;
+
+  tie(e, found) = boost::edge(source, target, graph);
+
+  return found ? graph[e].cost : -1;
+}
+
+int
+boost_dijkstra_nodes(edge_t *edges, unsigned int count, int source_vertex_id,
+                    double rdistance, bool directed, bool has_reverse_cost,
+                    path_element_t **path, int *path_count, char **err_msg)
+{
+  typedef adjacency_list < listS, vecS, directedS, Vertex, Edge > graph_t;
+  typedef graph_traits < graph_t >::vertex_descriptor vertex_descriptor;
+  typedef graph_traits < graph_t >::edge_descriptor edge_descriptor;
+
+  graph_t graph;
+
+  for (std::size_t j = 0; j < count; ++j)
+  {
+    edge_t& edge = edges[j];
+
+    graph_add_edge(graph, edge.id, edge.source, edge.target, edge.cost);    
+
+    if (!directed || (directed && has_reverse_cost))
     {
-	edge_descriptor e; bool inserted;
-	tie(e, inserted) = add_edge(edges[j].source, edges[j].target, graph);
-
-	graph[e].cost = edges[j].cost;
-	graph[e].id = edges[j].id;
-				
-	if (!directed || (directed && has_reverse_cost))
-	{
-	    tie(e, inserted) = add_edge(edges[j].target, edges[j].source, graph);
-	    graph[e].id = edges[j].id;
-
-	    if (has_reverse_cost)
-	    {
-		graph[e].cost = edges[j].reverse_cost;
-	    }
-	    else 
-	    {
-		graph[e].cost = edges[j].cost;
-	    }
-	}
+      if (has_reverse_cost)
+      {
+        graph_add_edge(graph, edge.id, edge.target, edge.source, edge.rcost);
+      }
+      else
+      {
+        graph_add_edge(graph, edge.id, edge.target, edge.source, edge.cost);
+      }
     }
+  }
 
-    std::vector<vertex_descriptor> predecessors(num_vertices(graph));
+  std::vector<vertex_descriptor> predecessors(num_vertices(graph));
+  std::vector<float8> distances(num_vertices(graph));
 
-    vertex_descriptor _source = vertex(start_vertex, graph);
+  dijkstra_shortest_paths(graph, source_vertex_id,
+                          predecessor_map(&predecessors[0])
+                          .weight_map(get(&Edge::cost, graph))
+                          .distance_map(&distances[0]));
 
-    if (_source < 0 /*|| _source >= num_nodes*/) 
-    {
-	*err_msg = (char *) "Starting vertex not found";
-	return -1;
+
+  graph_traits < graph_t >::vertex_iterator vi, vend;
+  vector<path_element_t> path_vector;
+
+  for(tie(vi, vend) = vertices(graph); vi != vend; vi++) {
+
+    if( (double)distances[*vi] <= rdistance ) {
+
+      path_element_t pe;
+      vertex_descriptor p;
+
+      p = predecessors[*vi];
+
+      pe.vertex_id = *vi;
+      pe.parent_id = p;
+      pe.edge_id   = get_edge_id(graph, p, *vi);
+      pe.cost      = distances[*vi];
+
+      path_vector.push_back( pe );
     }
+  }
 
-    vertex_descriptor _target = vertex(end_vertex, graph);
-    if (_target < 0 /*|| _target >= num_nodes*/)
-    {
-	*err_msg = (char *) "Ending vertex not found";
-	return -1;
-    }
+  if( path_vector.size() == 0 ) {
+    *err_msg = (char *)"No path found";
+    return 0;
+  }
 
-    std::vector<float8> distances(num_vertices(graph));
-    // calling Boost function
-    dijkstra_shortest_paths(graph, _source,
-			    predecessor_map(&predecessors[0]).
-			    weight_map(get(&Vertex::cost, graph))
-			    .distance_map(&distances[0]));
+  *path = (path_element_t *) malloc( sizeof(path_element_t) *
+                                     path_vector.size() );
+  *path_count = path_vector.size();
+  std::copy(path_vector.begin(), path_vector.end(), *path);
 
-    vector<int> path_vect;
-    int max = MAX_NODES;
-    path_vect.push_back(_target);
-
-    while (_target != _source) 
-    {
-	if (_target == predecessors[_target]) 
-	{
-	    *err_msg = (char *) "No path found";
-	    return 0;
-	}
-	_target = predecessors[_target];
-
-	path_vect.push_back(_target);
-	if (!max--) 
-	{
-	    *err_msg = (char *) "Overflow";
-	    return -1;
-	}
-    }
-
-    *path = (path_element_t *) malloc(sizeof(path_element_t) * (path_vect.size() + 1));
-    *path_count = path_vect.size();
-
-    for(int i = path_vect.size() - 1, j = 0; i >= 0; i--, j++)
-    {
-	graph_traits < graph_t >::vertex_descriptor v_src;
-	graph_traits < graph_t >::vertex_descriptor v_targ;
-	graph_traits < graph_t >::edge_descriptor e;
-	graph_traits < graph_t >::out_edge_iterator out_i, out_end;
-
-	(*path)[j].vertex_id = path_vect.at(i);
-
-	(*path)[j].edge_id = -1;
-	(*path)[j].cost = distances[_target];
-	
-	if (i == 0) 
-	{
-	    continue;
-	}
-
-	v_src = path_vect.at(i);
-	v_targ = path_vect.at(i - 1);
-
-	for (tie(out_i, out_end) = out_edges(v_src, graph); 
-	     out_i != out_end; ++out_i)
-	{
-	    graph_traits < graph_t >::vertex_descriptor v, targ;
-	    e = *out_i;
-	    v = source(e, graph);
-	    targ = target(e, graph);
-								
-	    if (targ == v_targ)
-	    {
-		(*path)[j].edge_id = graph[*out_i].id;
-		(*path)[j].cost = graph[*out_i].cost;
-		break;
-	    }
-	}
-    }
-
-    return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }
