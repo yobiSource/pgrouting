@@ -23,4 +23,4 @@ select pgr_createtopology('noded3', 0.000001, 'the_geom', 'gid');
 
 \echo '---------------------------------'
 
-select * from vertices_tmp order by id;
+select * from noded3_vertices_pgr order by id;
