@@ -27,88 +27,104 @@ General
 *******************************************************************************
 
 .. toctree::
-	:maxdepth: 1
+    :maxdepth: 2
 
-	src/introduction/index
-	src/introduction/support
-	src/installation/index
+    src/introduction/introduction
+    src/installation/index
+    src/installation/build
+    src/introduction/support
 
 
 *******************************************************************************
 Tutorial
 *******************************************************************************
 
+:ref:`Tutorial <tutorial1>`
+
+  - :ref:`Getting started <tutorial>`
+  - :ref:`topology` for an overview of a topology for routing algorithms.
+  - :ref:`analytics` for an overview of the analysis of a graph.
+  - :ref:`custom_query` that is used in the routing algorithms.
+  - :ref:`performance` to improve your performance.
+  - :ref:`custom_wrapper` to colaborate with a wrapper.
+  - :ref:`recipes` to colaborate with a recipe.
+  - :ref:`sampledata` that is used in the examples of this manual.
+
+
+
 .. toctree::
-	:maxdepth: 1
+   :hidden:
 
-	src/tutorial/index
-	src/tutorial/topology
-	src/tutorial/analytics
-	src/tutorial/custom_query
-	src/tutorial/custom_wrapper
-	src/tutorial/recipes
-	src/tutorial/performance
+   src/tutorial/index
+   src/developer/sampledata
 
-For a more complete introduction how to build a routing application read the `pgRouting Workshop <http://workshop.pgrouting.org>`_ (current version written for pgRouting 1.x).
+For a more complete introduction how to build a routing application read the `pgRouting Workshop <http://workshop.pgrouting.org>`_.
 
 *******************************************************************************
-Reference
+Data Types
 *******************************************************************************
 
-pgRouting provides several :ref:`common functions <common>`:
+:ref:`data_types`  
+
+  -  :ref:`type_cost_result` -  A set of records to describe a path result with cost attribute.
+  -  :ref:`pgr_costResult3[]<type_cost_result3>` - A set of records to describe a path result with cost attribute.
+  -  :ref:`pgr_geomResult<type_geom_result>` - A set of records to describe a path result with geometry attribute.
 
 .. toctree::
-	:maxdepth: 1
+   :hidden:
+
+   ../src/common/doc/types/index
+
+*******************************************************************************
+Functions reference
+*******************************************************************************
+
+:ref:`topology_functions`  
+
+  -  :ref:`pgr_create_topology` -  to create a topology based on the geometry.
+  -  :ref:`pgr_create_vert_table` - to reconstruct the vertices table based on the source and target information.
+  -  :ref:`pgr_analyze_graph`  - to analyze the edges and vertices of the edge table.
+  -  :ref:`pgr_analyze_oneway` - to analyze directionality of the edges.
+  -  :ref:`pgr_node_network`  -to create nodes to a not noded edge table.
+ 
+:ref:`routing_functions`  
+
+  -  :ref:`pgr_apspJohnson <pgr_apsp_johnson>`- All Pairs Shortest Path, Johnson’s Algorithm
+  -  :ref:`pgr_apspWarshall<pgr_apsp_warshall>` - All Pairs Shortest Path, Floyd-Warshall Algorithm
+  -  :ref:`pgr_astar<pgr_astar>` - Shortest Path A*
+  -  :ref:`pgr_bdAstar<bd_astar>` - Bi-directional A* Shortest Path
+  -  :ref:`pgr_bdDijkstra<bd_dijkstra>` - Bi-directional Dijkstra Shortest Path
+  -  :ref:`pgr_dijkstra<pgr_dijkstra>` - Shortest Path Dijkstra
+  -  :ref:`pgr_kDijkstra<pgr_kdijkstra>` - Mutliple destination Shortest Path Dijkstra
+  -  :ref:`pgr_ksp<ksp>` - K-Shortest Path
+  -  :ref:`pgr_tsp<pgr_tsp>` - Traveling Sales Person
+  -  :ref:`pgr_trsp<trsp>` - Turn Restriction Shortest Path (TRSP)
+
+:ref:`dd_index`  
+
+  - :ref:`pgr_driving_distance` - Driving Distance
+  - :ref:`pgr_alphaShape` - Alpha shape computation
+  - :ref:`pgr_points_as_polygon` - Polygon around set of points
+
+:ref:`developer_functions`  
+  -  :ref:`pgr_get_column_name` - to get the name of the column as is stored in the postgres administration tables.
+  -  :ref:`pgr_get_table_name` - to retrieve the name of the table as is stored in the postgres administration tables.
+  -  :ref:`pgr_is_column_indexed` - to check if the column is indexed.
+  -  :ref:`pgr_is_column_in_table` - to check only for the existance of the column.
+  -  :ref:`pgr_point_to_id` -to insert/get the id of the inserted point in a vertices table.
+  -  :ref:`pgr_quote_ident` - to quotes the input text to be used as an identifier in an SQL statement string.
+  -  :ref:`pgr_version` - to get pgRouting's version information.
+  -  :ref:`pgr_versionless` - to compare two version numbers.
+  -  :ref:`pgr_start_point` - to get the start point of a (multi)linestring.
+  -  :ref:`pgr_end_point` - to get the end point of a (multi)linestring.
+
+.. toctree::
 	:hidden:
 
-	../src/common/doc/index
-
-.. toctree::
-	:maxdepth: 1
-	:glob: 
-
-	../src/common/doc/functions/*
-
-pgRouting defines a few :ref:`custom data types <common_types>`:
-
-.. toctree::
-	:maxdepth: 1
-	:hidden:
-
-	../src/common/doc/types
-
-.. toctree::
-	:maxdepth: 1
-	:glob: 
-
-	../src/common/doc/types/*
-
-pgRouting functions in alphabetical order:
-
-.. toctree::
-	:maxdepth: 1
-
-	../src/apsp_johnson/doc/index
-	../src/apsp_warshall/doc/index
-	../src/astar/doc/index
-	../src/bd_astar/doc/index
-	../src/bd_dijkstra/doc/index
-	../src/dijkstra/doc/index
-	../src/kdijkstra/doc/index
-	../src/ksp/doc/index
-	../src/tsp/doc/index
-	../src/trsp/doc/index
-
-If pgRouting is compiled with "Driving Distance" enabled:
-
-.. toctree::
-	:maxdepth: 1
-
-	../src/driving_distance/doc/dd_alphashape
+	../src/common/doc/functions/index
+	../src/index
 	../src/driving_distance/doc/index
-	../src/driving_distance/doc/dd_points_as_polygon
-
-Some functions from previous releases may have been removed. 
+	../src/common/doc/utilities/index
 
 .. toctree::
 	:maxdepth: 1
@@ -122,21 +138,20 @@ Developer
 *******************************************************************************
 
 .. toctree::
-	:maxdepth: 1
+    :maxdepth: 2
 
-	src/installation/build
-	src/developer/index
-	src/developer/sampledata
+    src/developer/index
 
+:ref:`change_log`                            
 
-.. rubric:: Release Notes
+   - :ref:`changelog_2_0`                            
+   - :ref:`changelog_1_x`
 
 .. toctree::
-	:maxdepth: 1
+    :hidden:
 
-	src/changelog/2.0
-	src/changelog/1.x
-	
+    src/changelog/index
+
 
 .. rubric:: Indices and tables
 
